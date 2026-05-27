@@ -5,17 +5,23 @@ const mongoose = require('mongoose');
 
 dotenv.config();
 
+console.log('Starting server...');
+console.log('MONGO_URI:', process.env.MONGO_URI ? 'SET ✅' : 'MISSING ❌');
+console.log('JWT_SECRET:', process.env.JWT_SECRET ? 'SET ✅' : 'MISSING ❌');
+console.log('GEMINI_API_KEY:', process.env.GEMINI_API_KEY ? 'SET ✅' : 'MISSING ❌');
+
 const app = express();
 
-// Fix CORS properly
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000',
+    /\.vercel\.app$/
+  ],
   credentials: true
 }));
 
 app.use(express.json());
 
-// Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/interview', require('./routes/interview'));
 app.use('/api/recruiter', require('./routes/recruiter'));
@@ -30,4 +36,7 @@ mongoose.connect(process.env.MONGO_URI)
     app.listen(process.env.PORT || 5000, () =>
       console.log(`Server running on port ${process.env.PORT || 5000}`));
   })
-  .catch(err => console.error('DB connection failed:', err.message));
+  .catch(err => {
+    console.error('DB connection failed:', err.message);
+    process.exit(1);
+  });
