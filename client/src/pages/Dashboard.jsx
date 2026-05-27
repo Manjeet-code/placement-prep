@@ -15,7 +15,7 @@ export default function Dashboard() {
       .then(res => setInterviews(res.data))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [user]);
+  }, [user, navigate]);
 
   const scoreColor = (score) => {
     if (score >= 75) return '#22c55e';
