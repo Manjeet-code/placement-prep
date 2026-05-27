@@ -15,28 +15,41 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    /\.vercel\.app$/
+    /\.vercel\.app$/,
+    '*'
   ],
   credentials: true
 }));
 
 app.use(express.json());
 
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/interview', require('./routes/interview'));
-app.use('/api/recruiter', require('./routes/recruiter'));
-
 app.get('/', (req, res) => {
   res.json({ message: 'Placement Prep API running ✅' });
 });
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/interview', require('./routes/interview'));
+app.use('/api/recruiter', require('./routes/recruiter'));
+
+// MongoDB connect
+const connectDB = async () => {
+  try {
+    console.log('Connecting to MongoDB...');
+    await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+    });
     console.log('MongoDB connected ✅');
-    app.listen(process.env.PORT || 5000, () =>
-      console.log(`Server running on port ${process.env.PORT || 5000}`));
-  })
-  .catch(err => {
+  } catch (err) {
     console.error('DB connection failed:', err.message);
     process.exit(1);
+  }
+};
+
+const PORT = process.env.PORT || 5000;
+
+connectDB().then(() => {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT} ✅`);
   });
+});
