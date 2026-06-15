@@ -1,18 +1,19 @@
 const Interview = require('../models/Interview');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
+// Best free models on Groq
 const MODELS = [
-  'gemini-2.0-flash-lite',
-  'gemini-2.0-flash',
-  'gemini-2.5-flash'
+  'llama-3.3-70b-versatile',  // primary — best quality
+  'llama-3.1-8b-instant',     // fallback — very fast
+  'gemma2-9b-it'              // last resort
 ];
 
 const COMPANY_PROFILES = {
   google: {
     name: 'Google',
-    style: 'DSA heavy with emphasis on optimal solutions, System Design for senior roles, and Googleyness/Leadership questions. Focus on time and space complexity. Expect follow-up questions to optimize your solution further.',
+    style: 'DSA heavy with emphasis on optimal solutions, System Design for senior roles, and Googleyness/Leadership questions. Focus on time and space complexity.',
     rounds: {
       technical: 'Focus on arrays, strings, trees, graphs, dynamic programming. Always ask for time/space complexity. Push candidate to optimize.',
       system_design: 'Design scalable systems like Google Search, YouTube, Maps. Focus on scale, availability, consistency.',
@@ -44,7 +45,7 @@ const COMPANY_PROFILES = {
     name: 'Meta',
     style: 'Fast-paced coding rounds, System Design at scale (billions of users), and behavioral questions around Meta values.',
     rounds: {
-      technical: 'Hard DSA — graphs, dynamic programming, trees. Speed matters. Expect 2 problems per round.',
+      technical: 'Hard DSA — graphs, dynamic programming, trees. Speed matters.',
       system_design: 'Design social media features — News Feed, Instagram Stories, WhatsApp messaging at scale.',
       hr: 'Meta values — Move Fast, Be Bold, Focus on Impact, Be Open, Build Social Value.'
     },
@@ -256,8 +257,7 @@ const buildSystemPrompt = (role, difficulty, domain, company = null, round = 'te
   const companyProfile = company ? COMPANY_PROFILES[company.toLowerCase()] : null;
 
   if (companyProfile) {
-    return `
-You are an expert interviewer at ${companyProfile.name} conducting a ${difficulty} level ${round} round interview for the position of ${role}.
+    return `You are an expert interviewer at ${companyProfile.name} conducting a ${difficulty} level ${round} round interview for the position of ${role}.
 
 Company Culture & Style:
 ${companyProfile.style}
@@ -276,13 +276,10 @@ Your behavior:
 Important:
 ${companyProfile.tips}
 
-Never reveal you are an AI. Act as a human interviewer named "Alex" from ${companyProfile.name}.
-    `.trim();
+Never reveal you are an AI. Act as a human interviewer named "Alex" from ${companyProfile.name}.`;
   }
 
-  return `
-You are an expert technical interviewer conducting a ${difficulty} level interview
-for the position of ${role} focusing on ${domain}.
+  return `You are an expert technical interviewer conducting a ${difficulty} level interview for the position of ${role} focusing on ${domain}.
 
 Your behavior:
 - Start by warmly greeting the candidate and asking your first question
@@ -292,28 +289,30 @@ Your behavior:
 - Adapt questions based on answers
 - Be encouraging but professional
 
-Never reveal you are an AI. Act as a human interviewer named "Alex".
-  `.trim();
+Never reveal you are an AI. Act as a human interviewer named "Alex".`;
 };
 
-const callGemini = async (systemPrompt, messages) => {
+const callGroq = async (systemPrompt, messages) => {
   for (const modelName of MODELS) {
     try {
       console.log(`Trying model: ${modelName}`);
-      const model = genAI.getGenerativeModel({
+
+      const chatMessages = [
+        { role: 'system', content: systemPrompt },
+        ...messages.map(m => ({
+          role: m.role === 'assistant' ? 'assistant' : 'user',
+          content: m.content
+        }))
+      ];
+
+      const completion = await groq.chat.completions.create({
         model: modelName,
-        systemInstruction: systemPrompt
+        messages: chatMessages,
+        max_tokens: 1024,
+        temperature: 0.7
       });
 
-      const history = messages.slice(0, -1).map(m => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }]
-      }));
-
-      const lastMessage = messages[messages.length - 1].content;
-      const chat = model.startChat({ history });
-      const result = await chat.sendMessage(lastMessage);
-      return result.response.text();
+      return completion.choices[0].message.content;
 
     } catch (err) {
       console.error(`Model ${modelName} failed:`, err.message);
@@ -323,12 +322,16 @@ const callGemini = async (systemPrompt, messages) => {
   }
 };
 
-const callGeminiDirect = async (prompt) => {
+const callGroqDirect = async (prompt) => {
   for (const modelName of MODELS) {
     try {
-      const model = genAI.getGenerativeModel({ model: modelName });
-      const result = await model.generateContent(prompt);
-      return result.response.text();
+      const completion = await groq.chat.completions.create({
+        model: modelName,
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 1024,
+        temperature: 0.3
+      });
+      return completion.choices[0].message.content;
     } catch (err) {
       console.error(`Model ${modelName} failed:`, err.message);
       if (modelName === MODELS[MODELS.length - 1]) throw err;
@@ -347,7 +350,7 @@ exports.startInterview = async (req, res) => {
 
     const systemPrompt = buildSystemPrompt(role, difficulty, domain, company, round);
 
-    const aiMessage = await callGemini(systemPrompt, [
+    const aiMessage = await callGroq(systemPrompt, [
       { role: 'user', content: 'Start the interview.' }
     ]);
 
@@ -390,7 +393,7 @@ exports.sendMessage = async (req, res) => {
       interview.round
     );
 
-    const aiMessage = await callGemini(
+    const aiMessage = await callGroq(
       systemPrompt,
       interview.messages.map(m => ({ role: m.role, content: m.content }))
     );
@@ -440,7 +443,7 @@ Return exactly this structure:
   "summary": "2-3 sentence overall assessment"
 }`;
 
-    const raw = await callGeminiDirect(prompt);
+    const raw = await callGroqDirect(prompt);
     const clean = raw.replace(/```json|```/g, '').trim();
     const feedback = JSON.parse(clean);
 
