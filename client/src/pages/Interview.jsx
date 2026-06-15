@@ -3,13 +3,53 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import API from '../api/axios';
 
+const COMPANIES = [
+  { value: '', label: '🌐 General (No specific company)' },
+  { value: 'google', label: '🔵 Google' },
+  { value: 'amazon', label: '🟠 Amazon' },
+  { value: 'microsoft', label: '🔷 Microsoft' },
+  { value: 'meta', label: '🔵 Meta' },
+  { value: 'apple', label: '⚫ Apple' },
+  { value: 'flipkart', label: '🟡 Flipkart' },
+  { value: 'swiggy', label: '🟠 Swiggy' },
+  { value: 'zomato', label: '🔴 Zomato' },
+  { value: 'razorpay', label: '🔵 Razorpay' },
+  { value: 'cred', label: '⚫ CRED' },
+  { value: 'meesho', label: '🟣 Meesho' },
+  { value: 'tcs', label: '🔵 TCS' },
+  { value: 'infosys', label: '🔷 Infosys' },
+  { value: 'wipro', label: '🟢 Wipro' },
+  { value: 'accenture', label: '🟣 Accenture' },
+  { value: 'cognizant', label: '🔵 Cognizant' },
+  { value: 'mckinsey', label: '🔵 McKinsey' },
+  { value: 'deloitte', label: '🟢 Deloitte' },
+  { value: 'goldman_sachs', label: '🔵 Goldman Sachs' },
+  { value: 'jp_morgan', label: '🔷 JP Morgan' },
+  { value: 'salesforce', label: '🔵 Salesforce' },
+  { value: 'adobe', label: '🔴 Adobe' },
+  { value: 'ibm', label: '🔵 IBM' },
+  { value: 'oracle', label: '🔴 Oracle' },
+];
+
+const ROUNDS = [
+  { value: 'technical', label: '💻 Technical' },
+  { value: 'system_design', label: '🏗️ System Design' },
+  { value: 'hr', label: '🤝 HR Round' },
+];
+
 export default function Interview() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const bottomRef = useRef(null);
 
-  const [stage, setStage] = useState('setup'); // setup | interview | feedback
-  const [form, setForm] = useState({ role: '', difficulty: 'medium', domain: 'General' });
+  const [stage, setStage] = useState('setup');
+  const [form, setForm] = useState({
+    role: '',
+    difficulty: 'medium',
+    domain: 'General',
+    company: '',
+    round: 'technical'
+  });
   const [interviewId, setInterviewId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -17,7 +57,6 @@ export default function Interview() {
   const [feedback, setFeedback] = useState(null);
   const [exchanges, setExchanges] = useState(0);
 
-  // Auto scroll to bottom on new message
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -39,12 +78,10 @@ export default function Interview() {
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
-
     const userMsg = input.trim();
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setLoading(true);
-
     try {
       const res = await API.post('/interview/message', {
         interviewId,
@@ -80,6 +117,8 @@ export default function Interview() {
     }
   };
 
+  const selectedCompany = COMPANIES.find(c => c.value === form.company);
+
   // ── SETUP SCREEN ──
   if (stage === 'setup') return (
     <div style={s.page}>
@@ -93,23 +132,47 @@ export default function Interview() {
           <input style={s.input} placeholder="e.g. Frontend Developer, Data Analyst"
             value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} required />
 
-          <label style={s.label}>Domain / Focus Area</label>
-          <select style={s.input} value={form.domain}
-            onChange={e => setForm({ ...form, domain: e.target.value })}>
-            <option>General</option>
-            <option>DSA</option>
-            <option>React</option>
-            <option>Node.js</option>
-            <option>System Design</option>
-            <option>HR & Behavioral</option>
-            <option>Python</option>
-            <option>Database & SQL</option>
+          <label style={s.label}>Target Company</label>
+          <select style={s.input} value={form.company}
+            onChange={e => setForm({ ...form, company: e.target.value })}>
+            {COMPANIES.map(c => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
           </select>
+
+          <label style={s.label}>Interview Round</label>
+          <div style={s.diffRow}>
+            {ROUNDS.map(r => (
+              <button type="button" key={r.value}
+                onClick={() => setForm({ ...form, round: r.value })}
+                style={{ ...s.diffBtn, ...(form.round === r.value ? s.diffActive : {}) }}>
+                {r.label}
+              </button>
+            ))}
+          </div>
+
+          {!form.company && (
+            <>
+              <label style={s.label}>Domain / Focus Area</label>
+              <select style={s.input} value={form.domain}
+                onChange={e => setForm({ ...form, domain: e.target.value })}>
+                <option>General</option>
+                <option>DSA</option>
+                <option>React</option>
+                <option>Node.js</option>
+                <option>System Design</option>
+                <option>HR & Behavioral</option>
+                <option>Python</option>
+                <option>Database & SQL</option>
+              </select>
+            </>
+          )}
 
           <label style={s.label}>Difficulty</label>
           <div style={s.diffRow}>
             {['easy', 'medium', 'hard'].map(d => (
-              <button type="button" key={d} onClick={() => setForm({ ...form, difficulty: d })}
+              <button type="button" key={d}
+                onClick={() => setForm({ ...form, difficulty: d })}
                 style={{ ...s.diffBtn, ...(form.difficulty === d ? s.diffActive : {}) }}>
                 {d.charAt(0).toUpperCase() + d.slice(1)}
               </button>
@@ -117,7 +180,7 @@ export default function Interview() {
           </div>
 
           <button type="submit" style={s.startBtn} disabled={loading}>
-            {loading ? 'Starting...' : '🎤 Start Interview'}
+            {loading ? 'Starting...' : `🎤 Start ${selectedCompany?.label || 'General'} Interview`}
           </button>
         </form>
       </div>
@@ -129,8 +192,12 @@ export default function Interview() {
     <div style={s.page}>
       <div style={s.feedbackCard}>
         <h2 style={s.title}>Interview Feedback</h2>
+        {form.company && (
+          <p style={{ color: '#6366f1', fontWeight: '600', marginBottom: '0.5rem' }}>
+            {selectedCompany?.label} — {form.round} round
+          </p>
+        )}
 
-        {/* Score circle */}
         <div style={s.scoreCircle}>
           <span style={s.scoreNum}>{feedback.score}</span>
           <span style={s.scoreLabel}>/ 100</span>
@@ -138,15 +205,15 @@ export default function Interview() {
 
         <div style={s.feedSection}>
           <h3 style={{ color: '#22c55e' }}>✅ Strengths</h3>
-          {feedback.strengths.map((s, i) => (
-            <div key={i} style={styles.feedItem}>• {s}</div>
+          {feedback.strengths.map((item, i) => (
+            <div key={i} style={styles.feedItem}>• {item}</div>
           ))}
         </div>
 
         <div style={s.feedSection}>
           <h3 style={{ color: '#f59e0b' }}>⚠️ Areas to Improve</h3>
-          {feedback.improvements.map((s, i) => (
-            <div key={i} style={styles.feedItem}>• {s}</div>
+          {feedback.improvements.map((item, i) => (
+            <div key={i} style={styles.feedItem}>• {item}</div>
           ))}
         </div>
 
@@ -171,11 +238,12 @@ export default function Interview() {
   // ── CHAT SCREEN ──
   return (
     <div style={s.chatPage}>
-      {/* Header */}
       <div style={s.chatHeader}>
         <div>
-          <span style={s.chatTitle}>🎤 {form.role} Interview</span>
-          <span style={s.chatMeta}> · {form.domain} · {form.difficulty}</span>
+          <span style={s.chatTitle}>
+            🎤 {form.company ? `${selectedCompany?.label} — ` : ''}{form.role}
+          </span>
+          <span style={s.chatMeta}> · {form.round} · {form.difficulty}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <span style={s.exchangeBadge}>{exchanges} exchanges</span>
@@ -185,7 +253,6 @@ export default function Interview() {
         </div>
       </div>
 
-      {/* Messages */}
       <div style={s.chatBody}>
         {messages.map((msg, i) => (
           <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start', marginBottom: '1rem' }}>
@@ -212,8 +279,7 @@ export default function Interview() {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
-            <div style={s.inputRow}>
+      <div style={s.inputRow}>
         <textarea style={s.chatInput} rows={2}
           placeholder="Type your answer... (Enter to send, Shift+Enter for new line)"
           value={input} onChange={e => setInput(e.target.value)}
@@ -226,7 +292,6 @@ export default function Interview() {
   );
 }
 
-// Styles
 const s = {
   page: { minHeight: '100vh', background: '#f0f4ff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' },
   setupCard: { background: '#fff', padding: '2.5rem', borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', width: '100%', maxWidth: '480px' },
@@ -235,16 +300,15 @@ const s = {
   title: { margin: '0 0 0.25rem', fontSize: '1.6rem', color: '#1a1a2e' },
   subtitle: { color: '#888', marginBottom: '1.5rem' },
   label: { display: 'block', marginBottom: '0.4rem', fontWeight: '600', color: '#333', fontSize: '0.9rem' },
-  input: { width: '100%', padding: '0.75rem 1rem', marginBottom: '1.2rem', borderRadius: '8px', border: '1.5px solid #e0e0e0', fontSize: '1rem', boxSizing: 'border-box', outline: 'none' },
+  input: { width: '100%', padding: '0.75rem 1rem', marginBottom: '1.2rem', borderRadius: '8px', border: '1.5px solid #e0e0e0', fontSize: '1rem', boxSizing: 'border-box', outline: 'none', background: '#fff', color: '#1a1a2e' },
   diffRow: { display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' },
-  diffBtn: { flex: 1, padding: '0.6rem', borderRadius: '8px', border: '1.5px solid #e0e0e0', background: '#fff', cursor: 'pointer', fontWeight: '500', color: '#555' },
+  diffBtn: { flex: 1, padding: '0.6rem', borderRadius: '8px', border: '1.5px solid #e0e0e0', background: '#fff', cursor: 'pointer', fontWeight: '500', color: '#555', fontSize: '0.85rem' },
   diffActive: { background: '#6366f1', color: '#fff', border: '1.5px solid #6366f1' },
   startBtn: { width: '100%', padding: '0.85rem', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '1rem', cursor: 'pointer', fontWeight: '600' },
   scoreCircle: { width: '120px', height: '120px', borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', margin: '1rem auto 1.5rem' },
   scoreNum: { fontSize: '2.2rem', fontWeight: '700', color: '#fff' },
   scoreLabel: { fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)' },
   feedSection: { background: '#f9f9f9', borderRadius: '10px', padding: '1rem 1.25rem', marginBottom: '1rem' },
-  feedItem: { color: '#444', margin: '0.4rem 0', lineHeight: 1.5 },
   chatPage: { display: 'flex', flexDirection: 'column', height: '100vh', background: '#f0f4ff' },
   chatHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
   chatTitle: { fontWeight: '700', fontSize: '1.1rem', color: '#1a1a2e' },
@@ -262,4 +326,3 @@ const s = {
 };
 
 const styles = { feedItem: { color: '#444', margin: '0.4rem 0', lineHeight: 1.5 } };
-
