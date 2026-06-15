@@ -275,42 +275,6 @@ export default function RecruiterDashboard() {
 }
 
 const s = {
-  page: { minHeight: '100vh', background: '#f0f4ff', fontFamily: 'sans-serif' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
-  title: { margin: 0, fontSize: '1.5rem', color: '#1a1a2e' },
-  subtitle: { margin: 0, color: '#888', fontSize: '0.9rem' },
-  logoutBtn: { padding: '0.5rem 1.25rem', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
-  tabs: { display: 'flex', gap: '0.5rem', padding: '0.75rem 1.5rem', background: '#fff', borderBottom: '1px solid #eee', alignItems: 'center', flexWrap: 'wrap' },
-  tab: { padding: '0.5rem 1.25rem', borderRadius: '8px', border: '1.5px solid #e0e0e0', background: '#fff', cursor: 'pointer', fontWeight: '500', color: '#555' },
-  tabActive: { background: '#6366f1', color: '#fff', border: '1.5px solid #6366f1' },
-  filterRow: { display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: 'auto' },
-  filterLabel: { color: '#666', fontSize: '0.85rem', fontWeight: '600', whiteSpace: 'nowrap' },
-  scoreButtons: { display: 'flex', gap: '0.4rem' },
-  scoreBtn: { padding: '0.3rem 0.75rem', borderRadius: '20px', border: '1.5px solid #e0e0e0', background: '#fff', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '500', color: '#555' },
-  scoreBtnActive: { background: '#6366f1', color: '#fff', border: '1.5px solid #6366f1' },
-  body: { display: 'flex', height: 'calc(100vh - 120px)' },
-  list: { width: '360px', overflowY: 'auto', borderRight: '1px solid #eee', background: '#fff', padding: '1rem' },
-  card: { padding: '1rem', borderRadius: '10px', marginBottom: '0.75rem', cursor: 'pointer', border: '1.5px solid #eee' },
-  cardActive: { border: '1.5px solid #6366f1', background: '#f5f3ff' },
-  cardTop: { display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' },
-  avatar: { width: '40px', height: '40px', borderRadius: '50%', background: '#6366f1', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '1rem', flexShrink: 0 },
-  name: { fontWeight: '700', color: '#1a1a2e', fontSize: '0.95rem' },
-  email: { color: '#888', fontSize: '0.8rem' },
-  statsRow: { display: 'flex', gap: '0.5rem', flexWrap: 'wrap' },
-  statBadge: { fontSize: '0.78rem', background: '#f0f4ff', color: '#555', padding: '0.2rem 0.6rem', borderRadius: '20px' },
-  detail: { flex: 1, overflowY: 'auto', padding: '1.5rem 2rem' },
-  emptyDetail: { height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa', fontSize: '1.1rem' },
-  detailHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', background: '#fff', padding: '1.25rem', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
-  shortlistBtn: { padding: '0.6rem 1.25rem', border: 'none', borderRadius: '8px', fontWeight: '700', fontSize: '0.95rem' },
-  ivCard: { background: '#fff', borderRadius: '10px', padding: '1rem 1.25rem', marginBottom: '1rem', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' },
-  ivTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' },
-  roleTag: { fontWeight: '700', color: '#1a1a2e' },
-  ivMeta: { color: '#888', fontSize: '0.82rem', margin: '0 0 0.5rem' },
-  feedRow: { marginBottom: '0.25rem' }
-};
-
-const styles = s;
-const s = {
   page: { minHeight: '100vh', background: '#0a0a1a', fontFamily: "'Inter', sans-serif", position: 'relative' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.9rem 1.75rem', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)', position: 'sticky', top: 0, zIndex: 100 },
   title: { margin: 0, fontSize: '1rem', background: 'linear-gradient(135deg, #a78bfa, #6366f1)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: '700' },
