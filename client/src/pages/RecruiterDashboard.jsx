@@ -310,3 +310,38 @@ const s = {
 };
 
 const styles = s;
+const s = {
+  page: { minHeight: '100vh', background: '#0a0a1a', fontFamily: "'Inter', sans-serif", position: 'relative' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.9rem 1.75rem', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)', position: 'sticky', top: 0, zIndex: 100 },
+  title: { margin: 0, fontSize: '1rem', background: 'linear-gradient(135deg, #a78bfa, #6366f1)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: '700' },
+  subtitle: { margin: 0, color: '#475569', fontSize: '0.8rem' },
+  logoutBtn: { background: 'rgba(239,68,68,0.1)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', padding: '5px 14px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: '500' },
+  tabs: { display: 'flex', gap: '0.5rem', padding: '0.75rem 1.5rem', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.06)', flexWrap: 'wrap', alignItems: 'center' },
+  tab: { padding: '0.45rem 1.1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', cursor: 'pointer', fontWeight: '500', color: '#475569', fontSize: '0.85rem' },
+  tabActive: { background: 'rgba(99,102,241,0.15)', color: '#a78bfa', border: '1px solid rgba(99,102,241,0.3)' },
+  filterRow: { display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: 'auto' },
+  filterLabel: { color: '#475569', fontSize: '0.82rem', fontWeight: '500', whiteSpace: 'nowrap' },
+  scoreButtons: { display: 'flex', gap: '0.4rem' },
+  scoreBtn: { padding: '0.3rem 0.75rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', cursor: 'pointer', fontSize: '0.78rem', fontWeight: '500', color: '#475569' },
+  scoreBtnActive: { background: 'rgba(99,102,241,0.15)', color: '#a78bfa', border: '1px solid rgba(99,102,241,0.3)' },
+  body: { display: 'flex', height: 'calc(100vh - 100px)' },
+  list: { width: '340px', overflowY: 'auto', borderRight: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.01)', padding: '0.75rem' },
+  card: { padding: '0.9rem 1rem', borderRadius: '12px', marginBottom: '0.5rem', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)', position: 'relative', overflow: 'hidden' },
+  cardActive: { border: '1px solid rgba(99,102,241,0.3)', background: 'rgba(99,102,241,0.08)' },
+  cardTop: { display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.5rem' },
+  avatar: { width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #4c1d95, #6366f1)', color: '#a78bfa', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '0.85rem', flexShrink: 0, boxShadow: '0 4px 12px rgba(99,102,241,0.3)' },
+  name: { fontWeight: '600', color: '#e2e8f0', fontSize: '0.88rem' },
+  email: { color: '#475569', fontSize: '0.75rem' },
+  statsRow: { display: 'flex', gap: '0.4rem', flexWrap: 'wrap' },
+  statBadge: { fontSize: '0.72rem', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', color: '#475569', padding: '2px 8px', borderRadius: '20px' },
+  detail: { flex: 1, overflowY: 'auto', padding: '1.5rem' },
+  emptyDetail: { height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#334155', fontSize: '0.95rem' },
+  detailHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', padding: '1.1rem 1.25rem', borderRadius: '14px' },
+  shortlistBtn: { padding: '0.5rem 1.1rem', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem' },
+  ivCard: { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '1rem 1.25rem', marginBottom: '0.75rem' },
+  ivTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' },
+  roleTag: { fontWeight: '600', color: '#e2e8f0', fontSize: '0.9rem' },
+  ivMeta: { color: '#334155', fontSize: '0.78rem', margin: '0 0 0.5rem' },
+  feedRow: { marginBottom: '0.25rem' }
+};
+const styles = s;

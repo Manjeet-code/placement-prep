@@ -26,33 +26,110 @@ export default function Login() {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Welcome Back 👋</h2>
-        <p style={styles.subtitle}>Login to continue your prep</p>
-        {error && <div style={styles.error}>{error}</div>}
+    <div style={s.page}>
+      <div style={s.orb1} />
+      <div style={s.orb2} />
+
+      <div style={s.card}>
+        <div style={s.logoRow}>
+          <span style={s.logo}>PlacementPrep</span>
+        </div>
+        <h2 style={s.title}>Welcome back</h2>
+        <p style={s.subtitle}>Login to continue your prep</p>
+
+        {error && <div style={s.error}>{error}</div>}
+
         <form onSubmit={handleSubmit}>
-          <input style={styles.input} name="email" type="email" placeholder="Email"
+          <label style={s.label}>Email</label>
+          <input style={s.input} name="email" type="email"
+            placeholder="you@example.com"
             value={form.email} onChange={handleChange} required />
-          <input style={styles.input} name="password" type="password" placeholder="Password"
+
+          <label style={s.label}>Password</label>
+          <input style={s.input} name="password" type="password"
+            placeholder="••••••••"
             value={form.password} onChange={handleChange} required />
-          <button style={styles.button} type="submit" disabled={loading}>
+
+          <button style={{ ...s.btn, opacity: loading ? 0.7 : 1 }}
+            type="submit" disabled={loading}>
+            <span style={s.btnShine} />
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
-        <p style={styles.link}>Don't have an account? <Link to="/register">Register</Link></p>
+
+        <p style={s.linkRow}>
+          Don't have an account?{' '}
+          <Link to="/register" style={s.link}>Register</Link>
+        </p>
       </div>
     </div>
   );
 }
 
-const styles = {
-  container: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f4ff' },
-  card: { background: '#fff', padding: '2.5rem', borderRadius: '12px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', width: '100%', maxWidth: '420px' },
-  title: { margin: 0, fontSize: '1.8rem', color: '#1a1a2e' },
-  subtitle: { color: '#666', marginBottom: '1.5rem' },
-  input: { width: '100%', padding: '0.75rem 1rem', marginBottom: '1rem', borderRadius: '8px', border: '1.5px solid #e0e0e0', fontSize: '1rem', boxSizing: 'border-box', outline: 'none' },
-  button: { width: '100%', padding: '0.85rem', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '1rem', cursor: 'pointer', fontWeight: '600' },
-  error: { background: '#fff0f0', color: '#e53e3e', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.9rem' },
-  link: { textAlign: 'center', marginTop: '1rem', color: '#666' }
+const s = {
+  page: {
+    minHeight: '100vh', background: '#0a0a1a',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    padding: '1rem', position: 'relative', overflow: 'hidden'
+  },
+  orb1: {
+    position: 'fixed', top: '-100px', left: '-100px',
+    width: '400px', height: '400px', borderRadius: '50%',
+    background: 'radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%)',
+    pointerEvents: 'none'
+  },
+  orb2: {
+    position: 'fixed', bottom: '-100px', right: '-100px',
+    width: '350px', height: '350px', borderRadius: '50%',
+    background: 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)',
+    pointerEvents: 'none'
+  },
+  card: {
+    background: 'rgba(255,255,255,0.03)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: '24px', padding: '2.5rem',
+    width: '100%', maxWidth: '420px',
+    position: 'relative', zIndex: 10,
+    boxShadow: '0 25px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03) inset',
+    backdropFilter: 'blur(20px)'
+  },
+  logoRow: { marginBottom: '1.5rem' },
+  logo: {
+    fontSize: '1.1rem', fontWeight: '700',
+    background: 'linear-gradient(135deg, #a78bfa, #6366f1)',
+    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+  },
+  title: { color: '#f1f5f9', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.25rem' },
+  subtitle: { color: '#64748b', fontSize: '0.88rem', marginBottom: '1.75rem' },
+  label: { display: 'block', color: '#94a3b8', fontSize: '0.8rem', marginBottom: '0.4rem', fontWeight: '500', letterSpacing: '0.3px' },
+  input: {
+    width: '100%', padding: '0.75rem 1rem', marginBottom: '1.1rem',
+    borderRadius: '12px',
+    border: '1px solid rgba(255,255,255,0.08)',
+    background: 'rgba(255,255,255,0.04)',
+    color: '#e2e8f0', fontSize: '0.95rem',
+    boxSizing: 'border-box', outline: 'none',
+    transition: 'border-color 0.2s'
+  },
+  btn: {
+    width: '100%', padding: '0.85rem',
+    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+    color: '#fff', border: 'none', borderRadius: '12px',
+    fontSize: '0.95rem', fontWeight: '600', cursor: 'pointer',
+    marginTop: '0.25rem', position: 'relative', overflow: 'hidden',
+    boxShadow: '0 8px 25px rgba(99,102,241,0.4)'
+  },
+  btnShine: {
+    position: 'absolute', top: 0, left: 0, right: 0,
+    height: '50%',
+    background: 'linear-gradient(180deg, rgba(255,255,255,0.12), transparent)',
+    borderRadius: '12px 12px 0 0'
+  },
+  error: {
+    background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
+    color: '#f87171', borderRadius: '10px',
+    padding: '0.7rem 1rem', fontSize: '0.85rem', marginBottom: '1rem'
+  },
+  linkRow: { textAlign: 'center', color: '#475569', fontSize: '0.85rem', marginTop: '1.25rem' },
+  link: { color: '#a78bfa', fontWeight: '500' }
 };
