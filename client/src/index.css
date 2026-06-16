@@ -10,9 +10,8 @@ body {
 }
 
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0a0a1a; }
-::-webkit-scrollbar-thumb { background: #1e1e35; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #2a2a4a; }
+::-webkit-scrollbar-track { background: #0d0d2b; }
+::-webkit-scrollbar-thumb { background: #2a2a4d; border-radius: 3px; }
 
 a { color: #a78bfa; text-decoration: none; }
 a:hover { color: #c4b5fd; }
