@@ -242,3 +242,85 @@ exports.getCompanySuccessRate = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
+exports.getActivityFeed = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin')
+      return res.status(403).json({ message: 'Access denied.' });
+
+    // Ongoing interviews (live)
+    const ongoing = await Interview.find({ status: 'ongoing' })
+      .populate('student', 'name email')
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .select('student role company domain createdAt messages');
+
+    // Recently completed interviews
+    const recentCompleted = await Interview.find({ status: 'completed' })
+      .populate('student', 'name email')
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .select('student role company feedback createdAt');
+
+    // Recent shortlists
+    const recentShortlists = await Shortlist.find()
+      .populate('student', 'name email')
+      .populate('recruiter', 'name email')
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    // Recent registrations
+    const recentUsers = await User.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select('name email role createdAt');
+
+    // Build unified activity feed
+    const feed = [];
+
+    ongoing.forEach(iv => {
+      feed.push({
+        type: 'live_interview',
+        text: `${iv.student?.name || 'Someone'} is currently interviewing for ${iv.role}${iv.company ? ` at ${iv.company.toUpperCase()}` : ''}`,
+        timestamp: iv.createdAt,
+        exchanges: Math.floor((iv.messages?.length || 0) / 2)
+      });
+    });
+
+    recentCompleted.forEach(iv => {
+      feed.push({
+        type: 'completed_interview',
+        text: `${iv.student?.name || 'Someone'} completed ${iv.role}${iv.company ? ` at ${iv.company.toUpperCase()}` : ''} interview`,
+        timestamp: iv.createdAt,
+        score: iv.feedback?.score
+      });
+    });
+
+    recentShortlists.forEach(s => {
+      feed.push({
+        type: 'shortlist',
+        text: `${s.recruiter?.name || 'A recruiter'} shortlisted ${s.student?.name || 'a student'}`,
+        timestamp: s.createdAt
+      });
+    });
+
+    recentUsers.forEach(u => {
+      feed.push({
+        type: 'new_user',
+        text: `${u.name} joined as ${u.role}`,
+        timestamp: u.createdAt
+      });
+    });
+
+    // Sort by most recent first
+    feed.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    res.json({
+      liveCount: ongoing.length,
+      feed: feed.slice(0, 15)
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};

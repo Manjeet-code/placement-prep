@@ -9,7 +9,8 @@ const {
   getDomainPopularity,
   getTopStudents,
   getRecruiterActivity,
-  getCompanySuccessRate
+  getCompanySuccessRate,
+  getActivityFeed
 } = require('../controllers/adminController');
 
 router.use(protect);
@@ -22,5 +23,6 @@ router.get('/domain-popularity', getDomainPopularity);
 router.get('/top-students', getTopStudents);
 router.get('/recruiter-activity', getRecruiterActivity);
 router.get('/company-success-rate', getCompanySuccessRate);
+router.get('/activity-feed', getActivityFeed);
 
 module.exports = router;

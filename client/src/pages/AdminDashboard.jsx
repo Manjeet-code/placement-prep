@@ -8,6 +8,23 @@ import {
 
 const COLORS = ['#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd', '#4ade80', '#fbbf24', '#f87171', '#60a5fa'];
 
+const timeAgo = (timestamp) => {
+  const seconds = Math.floor((new Date() - new Date(timestamp)) / 1000);
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+};
+
+const FEED_ICONS = {
+  live_interview: '🔴',
+  completed_interview: '✅',
+  shortlist: '⭐',
+  new_user: '👤'
+};
+
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
   const [overview, setOverview] = useState(null);
@@ -19,6 +36,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [recruiterActivity, setRecruiterActivity] = useState([]);
   const [companySuccess, setCompanySuccess] = useState([]);
+  const [activityFeed, setActivityFeed] = useState({ liveCount: 0, feed: [] });
 
 useEffect(() => {
   const fetchAll = async () => {
@@ -50,11 +68,28 @@ useEffect(() => {
   fetchAll();
 }, []);
 
+useEffect(() => {
+  const fetchActivity = async () => {
+    try {
+      const res = await API.get('/admin/activity-feed');
+      setActivityFeed(res.data);
+    } catch (err) {
+      console.error('Activity feed error:', err);
+    }
+  };
+
+  fetchActivity(); // initial fetch
+  const interval = setInterval(fetchActivity, 10000); // refresh every 10 sec
+
+  return () => clearInterval(interval);
+}, []);
+
   if (loading) return (
     <div style={s.page}>
       <p style={{ color: '#475569', padding: '2rem' }}>Loading analytics...</p>
     </div>
   );
+  
 
   return (
     <div style={s.page}>
@@ -71,6 +106,17 @@ useEffect(() => {
       </div>
 
       <div style={s.body}>
+
+        {/* Live Activity Banner */}
+{activityFeed.liveCount > 0 && (
+  <div style={s.liveBanner}>
+    <span style={s.liveDot} />
+    <span style={s.liveText}>
+      {activityFeed.liveCount} interview{activityFeed.liveCount > 1 ? 's' : ''} happening right now
+    </span>
+  </div>
+)}
+
         {/* Overview Stats */}
         <div style={s.statsGrid}>
           <StatCard label="Total Students" val={overview.totalStudents} color="linear-gradient(135deg, #a78bfa, #6366f1)" />
@@ -227,6 +273,34 @@ useEffect(() => {
     )}
   </div>
 </ChartCard>
+{/* Activity Feed */}
+<ChartCard title="📡 Live Activity Feed">
+  <div style={s.feedList}>
+    {activityFeed.feed.map((item, i) => (
+      <div key={i} style={s.feedRow}>
+        <span style={s.feedIcon}>{FEED_ICONS[item.type]}</span>
+        <div style={{ flex: 1 }}>
+          <p style={s.feedText}>{item.text}</p>
+          {item.score !== undefined && (
+            <span style={{
+              ...s.feedScore,
+              color: item.score >= 70 ? '#4ade80' : item.score >= 50 ? '#fbbf24' : '#f87171'
+            }}>
+              Score: {item.score}/100
+            </span>
+          )}
+          {item.exchanges !== undefined && (
+            <span style={s.feedExchanges}>{item.exchanges} exchanges so far</span>
+          )}
+        </div>
+        <span style={s.feedTime}>{timeAgo(item.timestamp)}</span>
+      </div>
+    ))}
+    {activityFeed.feed.length === 0 && (
+      <p style={{ color: '#475569', textAlign: 'center' }}>No recent activity</p>
+    )}
+  </div>
+</ChartCard>
       </div>
     </div>
   );
@@ -289,4 +363,14 @@ successStats: { display: 'flex', gap: '1rem', alignItems: 'center' },
 successAvg: { color: '#a78bfa', fontSize: '0.78rem', fontWeight: '500' },
 successRate: { fontSize: '0.78rem', fontWeight: '600' },
 successAttempts: { color: '#475569', fontSize: '0.75rem' },
+liveBanner: { display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '12px', padding: '0.7rem 1.1rem', marginBottom: '1rem' },
+liveDot: { width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', boxShadow: '0 0 8px #ef4444', animation: 'pulse 1.5s infinite' },
+liveText: { color: '#f87171', fontSize: '0.85rem', fontWeight: '600' },
+feedList: { display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '400px', overflowY: 'auto' },
+feedRow: { display: 'flex', alignItems: 'flex-start', gap: '0.75rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '0.65rem 0.9rem' },
+feedIcon: { fontSize: '1rem', flexShrink: 0 },
+feedText: { color: '#e2e8f0', fontSize: '0.82rem', margin: 0, lineHeight: 1.4 },
+feedScore: { fontSize: '0.75rem', fontWeight: '600', marginTop: '2px', display: 'inline-block' },
+feedExchanges: { fontSize: '0.75rem', color: '#a78bfa', marginTop: '2px', display: 'inline-block' },
+feedTime: { color: '#334155', fontSize: '0.72rem', whiteSpace: 'nowrap', flexShrink: 0 },
 };
