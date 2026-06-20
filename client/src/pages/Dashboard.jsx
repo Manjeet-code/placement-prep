@@ -26,6 +26,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (user?.role === 'recruiter') { navigate('/recruiter'); return; }
+     if (user?.role === 'admin') { navigate('/admin'); return; }
     API.get('/interview/my')
       .then(res => setInterviews(res.data))
       .catch(console.error)

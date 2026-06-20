@@ -30,6 +30,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/interview', require('./routes/interview'));
 app.use('/api/recruiter', require('./routes/recruiter'));
+app.use('/api/admin', require('./routes/admin')); 
 
 // MongoDB connect
 const connectDB = async () => {

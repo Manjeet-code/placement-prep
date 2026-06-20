@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Interview from './pages/Interview';
 import RecruiterDashboard from './pages/RecruiterDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 
 export default function App() {
   return (
@@ -26,6 +27,9 @@ export default function App() {
             <Route path="/recruiter" element={
               <ProtectedRoute><RecruiterDashboard /></ProtectedRoute>
             } />
+            <Route path="/admin" element={
+             <ProtectedRoute><AdminDashboard /></ProtectedRoute>
+             } />
           </Routes>
         </BrowserRouter>
       </AuthProvider>
