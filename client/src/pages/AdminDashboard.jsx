@@ -18,18 +18,20 @@ export default function AdminDashboard() {
   const [topStudents, setTopStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [recruiterActivity, setRecruiterActivity] = useState([]);
+  const [companySuccess, setCompanySuccess] = useState([]);
 
 useEffect(() => {
   const fetchAll = async () => {
     try {
-      const [ov, sd, dt, cp, dp, ts, ra] = await Promise.all([
+      const [ov, sd, dt, cp, dp, ts, ra, cs] = await Promise.all([
         API.get('/admin/overview'),
         API.get('/admin/score-distribution'),
         API.get('/admin/daily-trend'),
         API.get('/admin/company-popularity'),
         API.get('/admin/domain-popularity'),
         API.get('/admin/top-students'),
-        API.get('/admin/recruiter-activity')
+        API.get('/admin/recruiter-activity'),
+        API.get('/admin/company-success-rate')
       ]);
       setOverview(ov.data);
       setScoreDistribution(sd.data);
@@ -38,6 +40,7 @@ useEffect(() => {
       setDomainPopularity(dp.data);
       setTopStudents(ts.data);
       setRecruiterActivity(ra.data);
+      setCompanySuccess(cs.data);
     } catch (err) {
       console.error('Admin dashboard error:', err);
     } finally {
@@ -187,6 +190,43 @@ useEffect(() => {
     )}
   </div>
 </ChartCard>
+
+{/* Company Success Rate */}
+<ChartCard title="🎯 Company-wise Success Rate">
+  <ResponsiveContainer width="100%" height={Math.max(240, companySuccess.length * 40)}>
+    <BarChart data={companySuccess} layout="vertical" margin={{ left: 20 }}>
+      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+      <XAxis type="number" domain={[0, 100]} stroke="#475569" fontSize={11} />
+      <YAxis dataKey="company" type="category" stroke="#475569" fontSize={11} width={90} />
+      <Tooltip
+        contentStyle={s.tooltip}
+        formatter={(value, name) => [`${value}${name === 'avgScore' ? '/100' : '%'}`, name === 'avgScore' ? 'Avg Score' : 'Success Rate']}
+      />
+      <Bar dataKey="avgScore" fill="#6366f1" radius={[0, 6, 6, 0]} name="avgScore" />
+    </BarChart>
+  </ResponsiveContainer>
+
+  <div style={s.successTable}>
+    {companySuccess.map((c, i) => (
+      <div key={i} style={s.successRow}>
+        <span style={s.successCompany}>{c.company.toUpperCase()}</span>
+        <div style={s.successStats}>
+          <span style={s.successAvg}>Avg: {c.avgScore}/100</span>
+          <span style={{
+            ...s.successRate,
+            color: c.successRate >= 60 ? '#4ade80' : c.successRate >= 30 ? '#fbbf24' : '#f87171'
+          }}>
+            {c.successRate}% pass rate
+          </span>
+          <span style={s.successAttempts}>{c.totalAttempts} attempts</span>
+        </div>
+      </div>
+    ))}
+    {companySuccess.length === 0 && (
+      <p style={{ color: '#475569', textAlign: 'center' }}>No company data yet</p>
+    )}
+  </div>
+</ChartCard>
       </div>
     </div>
   );
@@ -242,4 +282,11 @@ const s = {
 recStats: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' },
 recShortlist: { color: '#a78bfa', fontWeight: '600', fontSize: '0.82rem' },
 recDate: { color: '#475569', fontSize: '0.72rem' },
+successTable: { marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' },
+successRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '0.6rem 0.9rem' },
+successCompany: { color: '#e2e8f0', fontWeight: '600', fontSize: '0.82rem' },
+successStats: { display: 'flex', gap: '1rem', alignItems: 'center' },
+successAvg: { color: '#a78bfa', fontSize: '0.78rem', fontWeight: '500' },
+successRate: { fontSize: '0.78rem', fontWeight: '600' },
+successAttempts: { color: '#475569', fontSize: '0.75rem' },
 };

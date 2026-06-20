@@ -202,3 +202,43 @@ exports.getRecruiterActivity = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
+exports.getCompanySuccessRate = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin')
+      return res.status(403).json({ message: 'Access denied.' });
+
+    const interviews = await Interview.find({
+      company: { $ne: null },
+      status: 'completed'
+    }).select('company feedback.score');
+
+    const companyStats = {};
+
+    interviews.forEach(iv => {
+      const company = iv.company;
+      const score = iv.feedback?.score || 0;
+
+      if (!companyStats[company]) {
+        companyStats[company] = { totalScore: 0, count: 0, passCount: 0 };
+      }
+
+      companyStats[company].totalScore += score;
+      companyStats[company].count += 1;
+      if (score >= 70) companyStats[company].passCount += 1;
+    });
+
+    const result = Object.entries(companyStats).map(([company, stats]) => ({
+      company,
+      avgScore: Math.round(stats.totalScore / stats.count),
+      totalAttempts: stats.count,
+      successRate: Math.round((stats.passCount / stats.count) * 100)
+    }));
+
+    result.sort((a, b) => b.avgScore - a.avgScore);
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
