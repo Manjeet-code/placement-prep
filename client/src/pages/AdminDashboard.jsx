@@ -17,32 +17,35 @@ export default function AdminDashboard() {
   const [domainPopularity, setDomainPopularity] = useState([]);
   const [topStudents, setTopStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [recruiterActivity, setRecruiterActivity] = useState([]);
 
-  useEffect(() => {
-    const fetchAll = async () => {
-      try {
-        const [ov, sd, dt, cp, dp, ts] = await Promise.all([
-          API.get('/admin/overview'),
-          API.get('/admin/score-distribution'),
-          API.get('/admin/daily-trend'),
-          API.get('/admin/company-popularity'),
-          API.get('/admin/domain-popularity'),
-          API.get('/admin/top-students')
-        ]);
-        setOverview(ov.data);
-        setScoreDistribution(sd.data);
-        setDailyTrend(dt.data);
-        setCompanyPopularity(cp.data);
-        setDomainPopularity(dp.data);
-        setTopStudents(ts.data);
-      } catch (err) {
-        console.error('Admin dashboard error:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAll();
-  }, []);
+useEffect(() => {
+  const fetchAll = async () => {
+    try {
+      const [ov, sd, dt, cp, dp, ts, ra] = await Promise.all([
+        API.get('/admin/overview'),
+        API.get('/admin/score-distribution'),
+        API.get('/admin/daily-trend'),
+        API.get('/admin/company-popularity'),
+        API.get('/admin/domain-popularity'),
+        API.get('/admin/top-students'),
+        API.get('/admin/recruiter-activity')
+      ]);
+      setOverview(ov.data);
+      setScoreDistribution(sd.data);
+      setDailyTrend(dt.data);
+      setCompanyPopularity(cp.data);
+      setDomainPopularity(dp.data);
+      setTopStudents(ts.data);
+      setRecruiterActivity(ra.data);
+    } catch (err) {
+      console.error('Admin dashboard error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchAll();
+}, []);
 
   if (loading) return (
     <div style={s.page}>
@@ -161,6 +164,29 @@ export default function AdminDashboard() {
             )}
           </div>
         </ChartCard>
+        {/* Recruiter Activity */}
+<ChartCard title="🏢 Recruiter Activity">
+  <div style={s.topList}>
+    {recruiterActivity.map((rec, i) => (
+      <div key={i} style={s.recRow}>
+        <div style={s.topAvatar}>{rec.name[0].toUpperCase()}</div>
+        <div style={{ flex: 1 }}>
+          <div style={s.topName}>{rec.name}</div>
+          <div style={s.topEmail}>{rec.email}</div>
+        </div>
+        <div style={s.recStats}>
+          <span style={s.recShortlist}>⭐ {rec.shortlistCount} shortlisted</span>
+          <span style={s.recDate}>
+            Last active: {new Date(rec.lastActive).toLocaleDateString()}
+          </span>
+        </div>
+      </div>
+    ))}
+    {recruiterActivity.length === 0 && (
+      <p style={{ color: '#475569', textAlign: 'center' }}>No recruiters yet</p>
+    )}
+  </div>
+</ChartCard>
       </div>
     </div>
   );
@@ -211,5 +237,9 @@ const s = {
   topEmail: { color: '#334155', fontSize: '0.75rem' },
   topStats: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' },
   topScore: { color: '#4ade80', fontWeight: '700', fontSize: '0.95rem' },
-  topCount: { color: '#475569', fontSize: '0.72rem' }
+  topCount: { color: '#475569', fontSize: '0.72rem' },
+  recRow: { display: 'flex', alignItems: 'center', gap: '0.85rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '0.75rem 1rem' },
+recStats: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' },
+recShortlist: { color: '#a78bfa', fontWeight: '600', fontSize: '0.82rem' },
+recDate: { color: '#475569', fontSize: '0.72rem' },
 };

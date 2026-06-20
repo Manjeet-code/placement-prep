@@ -169,3 +169,36 @@ exports.getTopStudents = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
+exports.getRecruiterActivity = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin')
+      return res.status(403).json({ message: 'Access denied.' });
+
+    const recruiters = await User.find({ role: 'recruiter' }).select('name email createdAt');
+
+    const results = await Promise.all(recruiters.map(async (recruiter) => {
+      const shortlistCount = await Shortlist.countDocuments({ recruiter: recruiter._id });
+
+      const shortlists = await Shortlist.find({ recruiter: recruiter._id })
+        .sort({ createdAt: -1 })
+        .limit(1);
+
+      const lastActive = shortlists.length > 0 ? shortlists[0].createdAt : recruiter.createdAt;
+
+      return {
+        name: recruiter.name,
+        email: recruiter.email,
+        shortlistCount,
+        joinedAt: recruiter.createdAt,
+        lastActive
+      };
+    }));
+
+    const sorted = results.sort((a, b) => b.shortlistCount - a.shortlistCount);
+
+    res.json(sorted);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
