@@ -15,6 +15,11 @@ export default function RecruiterDashboard() {
   const [shortlistLoading, setShortlistLoading] = useState(false);
   const [shortlistHover, setShortlistHover] = useState(false);
   const [logoutHover, setLogoutHover] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
+const [selectedForCompare, setSelectedForCompare] = useState([]);
+const [compareData, setCompareData] = useState(null);
+const [compareLoading, setCompareLoading] = useState(false);
+const [showCompareModal, setShowCompareModal] = useState(false);
 
   useEffect(() => { fetchStudents(); }, []);
   useEffect(() => { if (tab === 'shortlisted') fetchShortlisted(); }, [tab]);
@@ -66,6 +71,43 @@ export default function RecruiterDashboard() {
       setShortlistLoading(false);
     }
   };
+
+  const toggleCompareSelect = (studentId) => {
+  setSelectedForCompare(prev => {
+    if (prev.includes(studentId)) {
+      return prev.filter(id => id !== studentId);
+    }
+    if (prev.length >= 4) {
+      alert('Maximum 4 students compare kar sakte ho ek saath');
+      return prev;
+    }
+    return [...prev, studentId];
+  });
+};
+
+const runCompare = async () => {
+  if (selectedForCompare.length < 2) {
+    alert('Kam se kam 2 students select karo compare karne ke liye');
+    return;
+  }
+  setCompareLoading(true);
+  try {
+    const res = await API.post('/recruiter/compare', { studentIds: selectedForCompare });
+    setCompareData(res.data);
+    setShowCompareModal(true);
+  } catch (err) {
+    alert(err.response?.data?.message || 'Compare failed');
+  } finally {
+    setCompareLoading(false);
+  }
+};
+
+const exitCompareMode = () => {
+  setCompareMode(false);
+  setSelectedForCompare([]);
+  setCompareData(null);
+  setShowCompareModal(false);
+};
 
   const scoreColor = (score) => {
     if (!score && score !== 0) return '#475569';
@@ -201,8 +243,9 @@ export default function RecruiterDashboard() {
             </div>
           </div>
         )}
+        
+        
       </div>
-
       <div style={s.body}>
         {/* Left Panel */}
         <div style={s.list}>

@@ -133,3 +133,66 @@ exports.getShortlisted = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
+exports.compareStudents = async (req, res) => {
+  try {
+    if (req.user.role !== 'recruiter')
+      return res.status(403).json({ message: 'Access denied.' });
+
+    const { studentIds } = req.body;
+
+    if (!studentIds || !Array.isArray(studentIds) || studentIds.length < 2)
+      return res.status(400).json({ message: 'Select at least 2 students to compare' });
+
+    if (studentIds.length > 4)
+      return res.status(400).json({ message: 'You can compare maximum 4 students at once' });
+
+    const results = await Promise.all(studentIds.map(async (id) => {
+      const student = await User.findById(id).select('name email');
+      if (!student) return null;
+
+      const interviews = await Interview.find({
+        student: id,
+        status: 'completed'
+      }).sort({ createdAt: -1 });
+
+      const scores = interviews.map(i => i.feedback?.score || 0);
+      const avgScore = scores.length > 0
+        ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+        : 0;
+      const bestScore = scores.length > 0 ? Math.max(...scores) : 0;
+
+      const allStrengths = interviews.flatMap(i => i.feedback?.strengths || []);
+      const allImprovements = interviews.flatMap(i => i.feedback?.improvements || []);
+
+      const isShortlisted = await Shortlist.findOne({
+        recruiter: req.user._id,
+        student: id
+      });
+
+      return {
+        _id: student._id,
+        name: student.name,
+        email: student.email,
+        totalInterviews: interviews.length,
+        avgScore,
+        bestScore,
+        topStrengths: [...new Set(allStrengths)].slice(0, 5),
+        topImprovements: [...new Set(allImprovements)].slice(0, 5),
+        recentInterviews: interviews.slice(0, 3).map(i => ({
+          role: i.role,
+          company: i.company,
+          domain: i.domain,
+          score: i.feedback?.score,
+          createdAt: i.createdAt
+        })),
+        isShortlisted: !!isShortlisted
+      };
+    }));
+
+    res.json(results.filter(r => r !== null));
+
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
